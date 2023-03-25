@@ -35,7 +35,19 @@ export function NoteForm({ onSubmit }: NoteFormProps) {
           <Col>
             <FormGroup controlId="tags">
               <Form.Label>Tags</Form.Label>
-              <CreatableReactSelect isMulti required />
+              <CreatableReactSelect
+                value={selectedTags.map((tag) => {
+                  return { label: tag.label, value: tag.id };
+                })}
+                onChange={(tags) => {
+                  setSelectedTags(
+                    tags.map((tag) => {
+                      return { label: tag.label, id: tag.value };
+                    })
+                  );
+                }}
+                isMulti
+              />
             </FormGroup>
           </Col>
         </Row>
