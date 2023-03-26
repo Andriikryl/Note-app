@@ -1,18 +1,41 @@
-import { Row, Col, Stack, Button, Form } from "react-bootstrap";
+import { Row, Col, Stack, Button, Form, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ReactSelect from "react-select";
 import { Tag } from "./App";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import styles from "./NoteList.module.css";
+
+type SimplifiedNote = {
+  tags: Tag[];
+  title: string;
+  id: string;
+};
 
 type NoteListProps = {
   availableTags: Tag[];
+  notes: SimplifiedNote[];
 };
 
-export function NoteList({ availableTags }: NoteListProps) {
+export function NoteList({ availableTags, notes }: NoteListProps) {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [title, setTitle] = useState("");
+
+  const fillteredNotes = useMemo(() => {
+    return notes.filter((note) => {
+      return (
+        (title === "" ||
+          note.title.toLowerCase().includes(title.toLowerCase())) &&
+        (selectedTags.length === 0 ||
+          selectedTags.every((tags) =>
+            note.tags.some((noteTag) => noteTag.id === tags.id)
+          ))
+      );
+    });
+  }, [title, selectedTags, notes]);
+
   return (
     <>
-      <Row>
+      <Row className="align-items-center mb-4">
         <Col>
           <h1>Notes</h1>
         </Col>
@@ -30,7 +53,12 @@ export function NoteList({ availableTags }: NoteListProps) {
           <Col>
             <Form.Group controlId="title">
               <Form.Label>Title</Form.Label>
-              <Form.Control type="text" placeholder="heeeere" />
+              <Form.Control
+                type="text"
+                placeholder="heeeere"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </Form.Group>
           </Col>
           <Col>
@@ -56,6 +84,25 @@ export function NoteList({ availableTags }: NoteListProps) {
           </Col>
         </Row>
       </Form>
+      <Row xs={1} sm={2} lg={3} xl={4} className="g-3">
+        {fillteredNotes.map((note) => (
+          <Col key={note.id}>
+            <NoteCard id={note.id} title={note.title} tags={note.tags} />
+          </Col>
+        ))}
+      </Row>
     </>
+  );
+}
+
+function NoteCard({ id, title, tags }: SimplifiedNote) {
+  return (
+    <Card
+      as={Link}
+      to={`/${id}`}
+      className={`h-100 text-reset text-decoration-none  ${styles.card}`}
+    >
+      <Card.Body></Card.Body>
+    </Card>
   );
 }
